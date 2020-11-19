@@ -1,0 +1,2 @@
+<!--pages/sign/sign.wxml-->
+<button bindtap="site">签到</button>
