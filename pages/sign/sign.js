@@ -52,13 +52,13 @@ Page({
     s = s * 6378.137*2.0;
     console.log(Number(s));
     //s = Math.round(s * 10000) / 10000;
-        if (Number(s)>0.2){
+        if (Number(s)>10){
           wx.showModal({
             title: '温馨提示',
             content: '你不在范围内',
             success: function (res) {
               if (res.confirm) {
-                  that.site()
+                console.log('用户点击确定')
               } else if (res.cancel) {
                 console.log('用户点击取消')
               }
@@ -70,7 +70,7 @@ Page({
             content: '签到成功',
             success: function (res) {
               if (res.confirm) {
-                  that.site()
+                console.log('用户点击确定')
               } else if (res.cancel) {
                 console.log('用户点击取消')
               }
