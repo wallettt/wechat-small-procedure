@@ -15,7 +15,11 @@ Page({
     
 
   },
-
+  run: function(){
+    wx.navigateTo({
+      url: '../run/run',
+    })
+  },
   site: function () {
     var that = this;
      var lat1=1.0;
