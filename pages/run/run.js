@@ -23,9 +23,8 @@ function count_down(that) {
 
   if (countTooGetLocation >= 1000) { //1000为1s
       getlocation(that);
-      
-      
-      that.meters=showMeters;
+
+      that.setData({meters:showMeters});
       drawline();
       countTooGetLocation = 0;
   }   
@@ -87,12 +86,18 @@ function getlocation(that) {
       }
    });
     wx.getLocation({
+      type : 'gcj02',
       success(res) {
       console.log("test front");
             lat = res.latitude;
             lng = res.longitude;
+
+            that.setData({
+              longitude : res.longitude,
+              latitude : res.latitude,
+            });
             var len= point.length;
-            console.log(point);
+            // console.log(point);
 
             if (len == 0) {
               point.push({latitude: lat, longitude : lng});
@@ -107,11 +112,11 @@ function getlocation(that) {
             }
             oriMeters = oriMeters + newMeters; 
             console.log("newMeters----------")
-            console.log(newMeters);
+            console.log(oriMeters);
             point.push({latitude: lat, longitude : lng});
-            console.log(point);
+            // console.log(point);
             var meters = new Number(oriMeters);
-            showMeters = meters.toFixed(2);
+            showMeters = meters.toFixed(5);
       
     }});
 
@@ -124,9 +129,11 @@ Page({
        latitude: 30.67694091796875,
        meters : 0.0,
        time: "0:00:00",
+       markers: []
    },
  
     onLoad : function () {
+      clearInterval(numid);
       point = [];
       that2 = this;
       countTooGetLocation = 0;
@@ -171,10 +178,24 @@ Page({
            }
        });
         this.mapCtx.moveToLocation();
-
+        wx.startLocationUpdate({
+          success: (res) => {
+            console.log('init success');
+          },
+        });
+       wx.onLocationChange(
+         function(res){
+          console.log(res);
+          that2.setData({
+            longitude : res.longitude,
+            latitude : res.latitude,
+          });
+         }
+       );
     },
     locate : function(){
       this.mapCtx.moveToLocation();
+      console.log(this.mapCtx);
     },
     start : function () {
       console.log('start');
@@ -185,8 +206,6 @@ Page({
       numid = setInterval(() => {
          count_down(this);
       }, 10);
-      count_down(this);
-      
 
     },
     end : function () {
@@ -198,9 +217,6 @@ Page({
     //****************************
   updateTime:function (time) {
 
-    var data = this.data;
-    data.time = time;
-    this.data = data;
     this.setData ({
       time : time,
     })
