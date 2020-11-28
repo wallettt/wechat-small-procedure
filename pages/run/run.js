@@ -1,4 +1,3 @@
-
 var point = [];
 var that2;
 var countTooGetLocation = 0;
@@ -7,8 +6,11 @@ var starRun = 0;
 var totalSecond  = 0;
 var oriMeters = 0.0;
 var showMeters = 0.0;
-function count_down(that) {
+var numid = 0;
 
+function count_down(that) {
+  countTooGetLocation += 10;
+  total_micro_second += 10;
   if (starRun == 0) {
     return;
   }
@@ -22,20 +24,13 @@ function count_down(that) {
   if (countTooGetLocation >= 1000) { //1000为1s
       getlocation(that);
       
+      
       that.meters=showMeters;
       drawline();
       countTooGetLocation = 0;
   }   
   
 
-setTimeout
-  setTimeout(function(){
-  countTooGetLocation += 10;
-  total_micro_second += 10;
-  count_down(that);
-  }
-  ,10
-  )
 }
 
 
@@ -85,35 +80,28 @@ function drawline() {
 //获取经纬度
 function getlocation(that) {
     var lat, lng;
-    wx.startLocationUpdateBackground({
-      success: (res) => {console.log("test back");},
-    })
+
     wx.startLocationUpdate({
       success: (res) => {
-        console.log("test front");
+        console.log("trace start")
+      }
+   });
+    wx.getLocation({
+      success(res) {
+      console.log("test front");
             lat = res.latitude;
             lng = res.longitude;
             var len= point.length;
-            
+            console.log(point);
 
             if (len == 0) {
               point.push({latitude: lat, longitude : lng});
               len=1;
             }
+            
             var lastCover =point[len-1];
             var newMeters = getDistance(lastCover.latitude,lastCover.longitude,res.latitude,res.longitude)/1000;
-            that.mapCtx.translateMarker({
-              markerId: 1,
-              autoRotate: true,
-              duration: 1000,
-              destination: {
-                latitude:lat,
-                longitude:lng,
-              },
-              animationEnd() {
-                console.log('animation end')
-              }
-            });
+            
             if (newMeters < 0.0015){
               newMeters = 0.0;
             }
@@ -124,8 +112,8 @@ function getlocation(that) {
             console.log(point);
             var meters = new Number(oriMeters);
             showMeters = meters.toFixed(2);
-      },
-    });
+      
+    }});
 
 }
  
@@ -136,19 +124,41 @@ Page({
        latitude: 30.67694091796875,
        meters : 0.0,
        time: "0:00:00",
-       markers: [{
-        id: 1,
-        latitude: 23.099994,
-        longitude: 113.324520,
-        width: 20,   // 使用图标的宽度
-        height: 20, // 使用图标的高度
-        name: 'loc'
-      }]
    },
  
     onLoad : function () {
+      point = [];
+      that2 = this;
+      countTooGetLocation = 0;
+      total_micro_second = 0;
+      starRun = 0;
+      totalSecond  = 0;
+      oriMeters = 0.0;
+      showMeters = 0.0;
         this.mapCtx = wx.createMapContext('myMap');
         that2 = this;
+        wx.openSetting({
+          success(res) {
+            console.log(res.authSetting);
+            if (!res.authSetting['scope.userLocation']) {
+              wx.authorize({
+                scope: 'scope.userLocation',
+                success () {
+                  
+                }
+              })
+            };
+            if (!res.authSetting['scope.userLocationBackground']) {
+              wx.authorize({
+                scope: 'scope.userLocationBackground',
+                success () {
+                  
+                }
+              })
+            };
+          }
+        });
+        
         wx.getLocation({
           type : 'wgs84',
            success : function (res) {
@@ -161,25 +171,28 @@ Page({
            }
        });
         this.mapCtx.moveToLocation();
-        count_down(this);
+
     },
     locate : function(){
       this.mapCtx.moveToLocation();
     },
     start : function () {
-        
+      console.log('start');
       if (starRun == 1) {
         return;
       }
       starRun =1;
+      numid = setInterval(() => {
+         count_down(this);
+      }, 10);
       count_down(this);
       
 
     },
     end : function () {
         console.log('end');
+        clearInterval(numid);
         starRun = 0;
-        count_down(this);
 
     },
     //****************************
