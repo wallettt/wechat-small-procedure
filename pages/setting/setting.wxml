@@ -1,0 +1,5 @@
+<!--pages/setting/setting.wxml-->
+<view bindtap="helpTap" class="wode_item" >
+		运动记录设置
+		<span class="arrow_wrap"></span>
+	</view>
